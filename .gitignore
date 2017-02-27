@@ -1,0 +1,17 @@
+__pycache__/
+**/*.pyc
+
+# Sphinx build directory.
+/docs/_build/
+
+# The entire Pycharm .idea directory because useless information is
+# still included after using the recommended ignores, e.g. the path to the
+# virtualenv used.
+/.idea/
+
+## Other PyCharm-specific ignores follow
+## File-based project format:
+*.iws
+
+# IntelliJ
+/out/
