@@ -345,3 +345,58 @@ def trotz(theta, units='rad'):
                    axes
     """
     return trot_any_(theta, 'z', units)
+
+
+# Conversion between roll/pitch/yaw and rotational matrices
+# -----------------------------------------------------------------------------
+
+
+def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
+    """
+    Generate rotation matrix from roll-pitch-yaw angles.
+
+    Parameters
+    ----------
+    roll_pitch_yaw : numpy.ndarray or tuple or list of int or float
+        If tuple or list: roll, pitch, and yaw.
+        If numpy.ndarray: n x 3 array of roll, pitch, and yaw.
+
+    units : {'rad', 'deg'}, optional
+        'rad' if `roll_pitch_yaw` is given in radians, 'deg' if degrees.
+
+    axis_order : {'xyz', 'zyx'}, optional
+        'xyz' for rotations about x, y, z axes or 'zyx' for rotations about
+        z, y, x axes.
+
+    Returns
+    -------
+    3 x 3 x n numpy.array
+        Array of n rotation matrices
+
+    Raises
+    ------
+    ValueError
+        If units or axis_order is invalid
+    """
+    if not isinstance(roll_pitch_yaw, (tuple, list)):
+        if not isinstance(roll_pitch_yaw, np.ndarray):
+            raise ValueError('Expected tuple, list, or numpy.ndarray subclass '
+                             'for roll_pitch_yaw, instead got {}.'.format(
+                    type(roll_pitch_yaw)))
+
+    if axis_order == 'xyz':
+        rot_func_a, rot_func_b, rot_func_c = rotx, roty, rotz
+    elif axis_order == 'zyx':
+        rot_func_a, rot_func_b, rot_func_c = rotz, roty, rotx
+    else:
+        raise ValueError("Expected one of ('xyz', 'zyx') for argument "
+                         "axis_order, instead got {}.".format(axis_order))
+
+    roll_pitch_yaw = convert_angle_(roll_pitch_yaw, units)
+
+    if isinstance(roll_pitch_yaw, (tuple, list)) or roll_pitch_yaw.ndim == 1:
+        roll, pitch, yaw = roll_pitch_yaw
+        return rot_func_a(roll) @ rot_func_b(pitch) @ rot_func_c(yaw)
+    else:
+        return np.stack((rot_func_a(roll) @ rot_func_b(pitch) @ rot_func_c(yaw)
+                         for roll, pitch, yaw in roll_pitch_yaw), 0)

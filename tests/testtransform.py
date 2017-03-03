@@ -61,5 +61,62 @@ class TestRotation(unittest.TestCase):
                                           decimal=4)
 
 
+class TestRollPitchYawConversion(unittest.TestCase):
+    def test_rpy2r_native_sequence_rad(self):
+        testing.assert_array_almost_equal(rpy2r((0.1, 0.2, 0.3)), np.array([[0.9363, -0.2896, 0.1987],
+                                                                            [0.3130, 0.9447, -0.0978],
+                                                                            [-0.1593, 0.1538, 0.9752]]),
+                                          decimal=4)
+
+    def test_rpy2r_native_sequence_deg(self):
+        testing.assert_array_almost_equal(rpy2r((0.1, 0.2, 0.3), units='deg'),
+                                          np.array([[1, -0.0052, 0.0035],
+                                                   [0.0052, 1, -0.0017],
+                                                   [-0.0035, 0.0018, 1]]),
+                                          decimal=4)
+
+    def test_rpy2r_native_sequence_zyx(self):
+        testing.assert_array_almost_equal(rpy2r((0.1, 0.2, 0.3),
+                                                axis_order='zyx'),
+                                          np.array([[0.9752, -0.0370, 0.2184],
+                                                    [0.0978, 0.9564, -0.2751],
+                                                    [-0.1987, 0.2896, 0.9363]]),
+                                          decimal=4)
+
+    def test_rpy2r_single_row_numpy_array_rad(self):
+        testing.assert_array_almost_equal(rpy2r(np.array([0.1, 0.2, 0.3])),
+                                          np.array([[0.9363, -0.2896, 0.1987],
+                                                    [0.3130, 0.9447, -0.0978],
+                                                    [-0.1593, 0.1538, 0.9752]]),
+                                          decimal=4)
+
+    def test_rpy2r_single_row_numpy_array_deg(self):
+        testing.assert_array_almost_equal(rpy2r(np.array([0.1, 0.2, 0.3]),
+                                                units='deg'),
+                                          np.array([[1, -0.0052, 0.0035],
+                                                    [0.0052, 1, -0.0017],
+                                                    [-0.0035, 0.0018, 1]]),
+                                          decimal=4)
+
+    def test_rpy2r_single_row_numpy_array_zyx(self):
+        testing.assert_array_almost_equal(rpy2r(np.array([0.1, 0.2, 0.3]),
+                                                axis_order='zyx'),
+                                          np.array([[0.9752, -0.0370, 0.2184],
+                                                    [0.0978, 0.9564, -0.2751],
+                                                    [-0.1987, 0.2896, 0.9363]]),
+                                          decimal=4)
+
+    def test_rpy2r_single_row_zeros_numpy_array(self):
+        testing.assert_array_almost_equal(rpy2r(np.zeros(3)), np.eye(3),
+                                          decimal=4)
+
+    def test_rpy2r_trajectory(self):
+        rpy_mat = np.tile(np.array([0.1, 0.2, 0.3]), 3).reshape(3, 3)
+        testing.assert_array_almost_equal(rpy2r(rpy_mat)[1],
+                                          np.array([[0.9363, -0.2896, 0.1987],
+                                                    [0.3130, 0.9447, -0.0978],
+                                                    [-0.1593, 0.1538, 0.9752]]),
+                                          decimal=4)
+
 if __name__ == '__main__':
     unittest.main()
