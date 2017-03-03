@@ -1,6 +1,10 @@
 import numpy as np
 
 
+# Helper functions
+# -----------------------------------------------------------------------------
+
+
 def check_argument_axis_(axis):
     """Raise an error on invalid axis."""
     if axis not in ('x', 'y', 'z'):
@@ -25,6 +29,10 @@ def convert_angle_(theta, units):
     return theta
 
 
+# Rotational matrix generation
+# -----------------------------------------------------------------------------
+
+
 def rot2(theta, units='rad'):
     """
     Generate a 2 x 2 rotation matrix representing a rotation by angle theta.
@@ -39,7 +47,7 @@ def rot2(theta, units='rad'):
 
     Returns
     -------
-    2 x 2 np.array
+    2 x 2 numpy.array
         Rotation matrix.
 
     Raises
@@ -106,7 +114,7 @@ def rotx(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 np.array
+    3 x 3 numpy.array
         Rotation matrix.
 
     Raises
@@ -137,7 +145,7 @@ def roty(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 np.array
+    3 x 3 numpy.array
         Rotation matrix.
 
     Raises
@@ -168,7 +176,7 @@ def rotz(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 np.array
+    3 x 3 numpy.array
         Rotation matrix.
 
     Raises
@@ -199,7 +207,7 @@ def trot2(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 np.array
+    3 x 3 numpy.array
         Homogeneous transformation matrix.
 
     Raises
@@ -217,6 +225,10 @@ def trot2(theta, units='rad'):
 
     homo_trans = np.column_stack((rot2(theta, units), [0, 0]))
     return np.row_stack((homo_trans, [0, 0, 1]))
+
+
+# Homogeneous transformation matrix generation
+# -----------------------------------------------------------------------------
 
 
 def trot_any_(theta, axis, units='rad'):
@@ -254,7 +266,7 @@ def trotx(theta, units='rad'):
 
     Returns
     -------
-    4 x 4 np.array
+    4 x 4 numpy.array
         Homogeneous transformation matrix.
 
     Raises
@@ -286,7 +298,7 @@ def troty(theta, units='rad'):
 
     Returns
     -------
-    4 x 4 np.array
+    4 x 4 numpy.array
         Homogeneous transformation matrix.
 
     Raises
@@ -318,7 +330,7 @@ def trotz(theta, units='rad'):
 
     Returns
     -------
-    4 x 4 np.array
+    4 x 4 numpy.array
         Homogeneous transformation matrix.
 
     Raises
