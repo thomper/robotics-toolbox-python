@@ -39,6 +39,43 @@ class TestRotation(unittest.TestCase):
         testing.assert_array_almost_equal(troty(np.pi / 2), troty(90, 'deg'), decimal=9)
         testing.assert_array_almost_equal(trotz(np.pi / 2), trotz(90, 'deg'), decimal=9)
 
+    def test_r2t_2d_single_matrix(self):
+        testing.assert_array_almost_equal(r2t(np.array([[1, 2], [3, 4]])),
+                                          np.array([[1, 2, 0],
+                                                    [3, 4, 0],
+                                                    [0, 0, 1]]),
+                                          decimal=4)
+
+    def test_r2t_2d_multiple_matrices(self):
+        rot_mats = np.tile(np.array([[1, 2], [3, 4]]), (10, 1, 1))
+        transforms = r2t(rot_mats)
+        self.assertEqual(transforms.shape, (10, 3, 3))
+        testing.assert_array_almost_equal(transforms[1], np.array([[1, 2, 0],
+                                                                   [3, 4, 0],
+                                                                   [0, 0, 1]]),
+                                          decimal=4)
+
+    def test_r2t_3d_single_matrix(self):
+        testing.assert_array_almost_equal(r2t(np.array([[1, 2, 3],
+                                                        [4, 5, 6],
+                                                        [7, 8, 9]])),
+                                          np.array([[1, 2, 3, 0],
+                                                    [4, 5, 6, 0],
+                                                    [7, 8, 9, 0],
+                                                    [0, 0, 0, 1]]),
+                                          decimal=4)
+
+    def test_r2t_3d_multiple_matrices(self):
+        rot_mats = np.tile(np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]), (10, 1, 1))
+        transforms = r2t(rot_mats)
+        self.assertEqual(transforms.shape, (10, 4, 4))
+        testing.assert_array_almost_equal(transforms[4],
+                                          np.array([[1, 2, 3, 0],
+                                                    [4, 5, 6, 0],
+                                                    [7, 8, 9, 0],
+                                                    [0, 0, 0, 1]]),
+                                          decimal=4)
+
     def test_trotx(self):
         testing.assert_array_almost_equal(trotx(0.1), np.array([[1, 0, 0, 0],
                                                                 [0, 0.995, -0.0998, 0],

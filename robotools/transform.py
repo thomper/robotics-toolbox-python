@@ -192,6 +192,59 @@ def rotz(theta, units='rad'):
     return rot_any_(theta, 'z', units)
 
 
+# Homogeneous transformation matrix generation
+# -----------------------------------------------------------------------------
+
+
+def r2t(rot_mats):
+    """
+    Generate homogeneous transforms from rotation matrices.
+
+    The transforms have no translational component.  If the rotation matrices
+    are 2 x 2, the transforms are 3 x 3.  If the rotation matrices are 3 x 3
+    the transforms are 4 x 4.
+
+    Parameters
+    ----------
+    rot_mats : 2 x 2 or 3 x 3 or 2 x 2 x n or 3 x 3 x n numpy.ndarray
+        Array of rotational matrices to be converted.
+
+    Returns
+    -------
+    3 x 3 or 4 x 4 or 3 x 3 x n or 4 x 4 x n homogeneous transforms.
+
+    Raises
+    ------
+    ValueError
+        If `rot_mats` is not a valid shape for rotation matrices
+    """
+    if not any(((rot_mats.ndim == 2 and rot_mats.shape in ((2, 2), (3, 3))),
+                (rot_mats.ndim == 3 and rot_mats.shape[1:] in ((2, 2), (3, 3))))):
+        raise ValueError('Argument rot_mats must have a shape in ((2, 2), (3, '
+                         '3), (n, 2, 2), (n, 3, 3)) but instead was {}'
+                         .format(rot_mats.shape))
+
+    # All we're doing is adding an extra column and row, all zeros except for
+    # the bottom-right element which is 1.
+    is_2d = rot_mats.shape[-1] == 2
+    extra_column = np.zeros(2 if is_2d else 3)
+    extra_row = np.append(np.zeros(2 if is_2d else 3), [1])
+
+    # For the case with just one plane, the column_stack and row_stack functions
+    # do the trick.  We need to use the more general concatenate function for
+    # when there are multiple planes though.
+    is_single_matrix = rot_mats.ndim == 2
+    if is_single_matrix:
+        homo_trans = np.column_stack((rot_mats, extra_column))
+        return np.row_stack((homo_trans, extra_row))
+    else:
+        extra_columns = np.tile(extra_column[:, np.newaxis],
+                                (rot_mats.shape[0], 1, 1))
+        extra_rows = np.tile(extra_row, (rot_mats.shape[0], 1, 1))
+        homo_trans = np.concatenate((rot_mats, extra_columns), axis=2)
+        return np.concatenate((homo_trans, extra_rows), axis=1)
+
+
 def trot2(theta, units='rad'):
     """
     Generate a 3 x 3 homogeneous transformation matrix representing a
@@ -220,15 +273,8 @@ def trot2(theta, units='rad'):
     trotx, troty, trotz : Generate 4 x 4 homogeneous transformation matrix
     """
     check_argument_units_(units)
-
     theta = convert_angle_(theta, units)
-
-    homo_trans = np.column_stack((rot2(theta, units), [0, 0]))
-    return np.row_stack((homo_trans, [0, 0, 1]))
-
-
-# Homogeneous transformation matrix generation
-# -----------------------------------------------------------------------------
+    return r2t(rot2(theta, units))
 
 
 def trot_any_(theta, axis, units='rad'):
@@ -247,8 +293,7 @@ def trot_any_(theta, axis, units='rad'):
 
     rot_func = {'x': rotx, 'y': roty, 'z': rotz}[axis]
 
-    homo_trans = np.column_stack((rot_func(theta, units), [0, 0, 0]))
-    return np.row_stack((homo_trans, [0, 0, 0, 1]))
+    return r2t(rot_func(theta, units))
 
 
 def trotx(theta, units='rad'):
