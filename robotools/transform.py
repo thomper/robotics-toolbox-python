@@ -207,7 +207,7 @@ def r2t(rot_mats):
     Parameters
     ----------
     rot_mats : 2 x 2 or 3 x 3 or 2 x 2 x n or 3 x 3 x n numpy.ndarray
-        Array of rotational matrices to be converted.
+        Single or array of rotational matrices to be converted.
 
     Returns
     -------
@@ -216,12 +216,16 @@ def r2t(rot_mats):
     Raises
     ------
     ValueError
-        If `rot_mats` is not a valid shape for rotation matrices
+        If `rot_mats` is not a valid shape for rotation matrices.
+
+    See Also
+    --------
+    t2r : rotation matrices from homogeneous transformations
     """
     if not any(((rot_mats.ndim == 2 and rot_mats.shape in ((2, 2), (3, 3))),
                 (rot_mats.ndim == 3 and rot_mats.shape[1:] in ((2, 2), (3, 3))))):
         raise ValueError('Argument rot_mats must have a shape in ((2, 2), (3, '
-                         '3), (n, 2, 2), (n, 3, 3)) but instead was {}'
+                         '3), (n, 2, 2), (n, 3, 3)) but instead was {}.'
                          .format(rot_mats.shape))
 
     # All we're doing is adding an extra column and row, all zeros except for
