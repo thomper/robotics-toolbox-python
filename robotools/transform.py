@@ -47,7 +47,7 @@ def rot2(theta, units='rad'):
 
     Returns
     -------
-    2 x 2 numpy.array
+    2 x 2 numpy.ndarray
         Rotation matrix.
 
     Raises
@@ -114,7 +114,7 @@ def rotx(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 numpy.array
+    3 x 3 numpy.ndarray
         Rotation matrix.
 
     Raises
@@ -145,7 +145,7 @@ def roty(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 numpy.array
+    3 x 3 numpy.ndarray
         Rotation matrix.
 
     Raises
@@ -176,7 +176,7 @@ def rotz(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 numpy.array
+    3 x 3 numpy.ndarray
         Rotation matrix.
 
     Raises
@@ -207,7 +207,7 @@ def trot2(theta, units='rad'):
 
     Returns
     -------
-    3 x 3 numpy.array
+    3 x 3 numpy.ndarray
         Homogeneous transformation matrix.
 
     Raises
@@ -266,7 +266,7 @@ def trotx(theta, units='rad'):
 
     Returns
     -------
-    4 x 4 numpy.array
+    4 x 4 numpy.ndarray
         Homogeneous transformation matrix.
 
     Raises
@@ -298,7 +298,7 @@ def troty(theta, units='rad'):
 
     Returns
     -------
-    4 x 4 numpy.array
+    4 x 4 numpy.ndarray
         Homogeneous transformation matrix.
 
     Raises
@@ -330,7 +330,7 @@ def trotz(theta, units='rad'):
 
     Returns
     -------
-    4 x 4 numpy.array
+    4 x 4 numpy.ndarray
         Homogeneous transformation matrix.
 
     Raises
@@ -370,8 +370,8 @@ def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
 
     Returns
     -------
-    3 x 3 x n numpy.array
-        Array of n rotation matrices
+    3 x 3 x n numpy.ndarray
+        Array of n rotation matrices.
 
     Raises
     ------
