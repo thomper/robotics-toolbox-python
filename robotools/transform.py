@@ -249,6 +249,45 @@ def r2t(rot_mats):
         return np.concatenate((homo_trans, extra_rows), axis=1)
 
 
+def t2r(trans_mats):
+    """
+    Generate rotation matrices from homogeneous transformations.
+
+    If the transforms are 3 x 3, the rotational matrices are 2 x 2.  If the
+    transforms are 4 x 4, the rotational matrices are 3 x 3.
+
+    Parameters
+    ----------
+    trans_mats : 3 x 3 or 4 x 4 or 3 x 3 x n or 4 x 4 x n numpy.ndarray
+        Single or array of homogeneous transformations to be converted.
+
+    Returns
+    -------
+    2 x 2 or 3 x 3 or 2 x 2 x n or 3 x 3 x n rotation matrices.
+
+    Raises
+    ------
+    ValueError
+        If `trans_mats` is not a valid shape for homogeneous transforms.
+
+    See Also
+    --------
+    r2t : homogeneous transformations from rotation matrices
+    """
+    if not any(((trans_mats.ndim == 2 and trans_mats.shape in ((3, 3), (4, 4))),
+                (trans_mats.ndim == 3 and trans_mats.shape[1:] in ((3, 3), (4, 4))))):
+        raise ValueError('Argument trans_mats must have a shape in ((3, 3), '
+                         '(4, 4), (n, 3, 3), (n, 4, 4)) but instead was {}.'
+                         .format(trans_mats.shape))
+
+    # We're just chopping off the last row and column.
+    is_single_matrix = trans_mats.ndim == 2
+    if is_single_matrix:
+        return trans_mats[:-1, :-1].copy()
+    else:
+        return trans_mats[:, :-1, :-1].copy()
+
+
 def trot2(theta, units='rad'):
     """
     Generate a 3 x 3 homogeneous transformation matrix representing a
