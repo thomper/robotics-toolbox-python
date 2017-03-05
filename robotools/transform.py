@@ -59,8 +59,6 @@ def rot2(theta, units='rad'):
     --------
     rotx, roty, rotz : Generate 3 x 3 rotation matrix
     """
-    check_argument_units_(units)
-
     theta = convert_angle_(theta, units)
     cos = np.cos(theta)
     sine = np.sin(theta)
@@ -79,7 +77,6 @@ def rot_any_(theta, axis, units='rad'):
     unit: 'rad' if theta is given in radians, 'deg' if degrees
     """
     check_argument_axis_(axis)
-    check_argument_units_(units)
 
     theta = convert_angle_(theta, units)
     cos = np.cos(theta)
@@ -315,7 +312,6 @@ def trot2(theta, units='rad'):
     --------
     trotx, troty, trotz : Generate 4 x 4 homogeneous transformation matrix
     """
-    check_argument_units_(units)
     theta = convert_angle_(theta, units)
     return r2t(rot2(theta, units))
 
@@ -332,7 +328,6 @@ def trot_any_(theta, axis, units='rad'):
     unit: 'rad' if theta is given in radians, 'deg' if degrees
     """
     check_argument_axis_(axis)
-    check_argument_units_(units)
 
     rot_func = {'x': rotx, 'y': roty, 'z': rotz}[axis]
 
