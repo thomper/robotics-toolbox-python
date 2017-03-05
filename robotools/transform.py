@@ -459,7 +459,11 @@ def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
     Raises
     ------
     ValueError
-        If units or axis_order is invalid
+        If units or axis_order is invalid.
+
+    See Also
+    --------
+    rpy2tr : roll-pitch-yaw to homogeneous transform
     """
     if not isinstance(roll_pitch_yaw, (tuple, list)):
         if not isinstance(roll_pitch_yaw, np.ndarray):
@@ -483,3 +487,39 @@ def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
     else:
         return np.stack((rot_func_a(roll) @ rot_func_b(pitch) @ rot_func_c(yaw)
                          for roll, pitch, yaw in roll_pitch_yaw), 0)
+
+
+def rpy2tr(roll_pitch_yaw, units='rad', axis_order='xyz'):
+    """
+    Generate homogeneous transform from roll-pitch-yaw angles.
+
+    Note the transform has no translational component.
+
+    Parameters
+    ----------
+    roll_pitch_yaw : numpy.ndarray or tuple or list of int or float
+    If tuple or list: roll, pitch, and yaw.
+    If numpy.ndarray: n x 3 array of roll, pitch, and yaw.
+
+    units : {'rad', 'deg'}, optional
+        'rad' if `roll_pitch_yaw` is given in radians, 'deg' if degrees.
+
+    axis_order : {'xyz', 'zyx'}, optional
+        'xyz' for rotations about x, y, z axes or 'zyx' for rotations about
+        z, y, x axes.
+
+    Returns
+    -------
+    4 x 4 x n numpy.ndarray
+        Array of n homogeneous transforms.
+
+    Raises
+    ------
+    ValueError
+        If units or axis_order is invalid
+
+    See Also
+    --------
+    rpy2r : roll-pitch-yaw to rotation matrix
+    """
+    return r2t(rpy2r(roll_pitch_yaw, units, axis_order))
