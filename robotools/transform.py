@@ -471,7 +471,7 @@ def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
 
     See Also
     --------
-    rpy2tr : roll-pitch-yaw to homogeneous transform
+    rpy2t : roll-pitch-yaw to homogeneous transform
     rpy2jac : roll-pitch-yaw to Jacobian matrix
     """
     check_argument_roll_pitch_yaw_(roll_pitch_yaw)
@@ -494,7 +494,7 @@ def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
                          for roll, pitch, yaw in roll_pitch_yaw), 0)
 
 
-def rpy2tr(roll_pitch_yaw, units='rad', axis_order='xyz'):
+def rpy2t(roll_pitch_yaw, units='rad', axis_order='xyz'):
     """
     Generate homogeneous transform from roll-pitch-yaw angles.
 
@@ -502,9 +502,10 @@ def rpy2tr(roll_pitch_yaw, units='rad', axis_order='xyz'):
 
     Parameters
     ----------
-    roll_pitch_yaw : numpy.ndarray or tuple or list of int or float
-    If tuple or list: roll, pitch, and yaw.
-    If numpy.ndarray: n x 3 array of roll, pitch, and yaw.
+    roll_pitch_yaw : numpy.ndarray or tuple of int or tuple of float or
+                     list of int or list of float.
+                     If tuple or list: roll, pitch, and yaw.
+                     If numpy.ndarray: n x 3 array of roll, pitch, and yaw.
 
     units : {'rad', 'deg'}, optional
         'rad' if `roll_pitch_yaw` is given in radians, 'deg' if degrees.
@@ -529,6 +530,101 @@ def rpy2tr(roll_pitch_yaw, units='rad', axis_order='xyz'):
     rpy2jac : roll-pitch-yaw to Jacobian matrix
     """
     return r2t(rpy2r(roll_pitch_yaw, units, axis_order))
+
+
+def tr2rpy(mat, units='rad', axis_order='xyz'):
+    """
+    Get roll-pitch-yaw angles from a rotation matrix or homogeneous transform.
+
+    There is a singularity for the case where the pitch is pi / 2 in which case
+    the roll is arbitrarily set to zero and the yaw is roll + yaw.
+
+    Parameters
+    ----------
+    mat : 3 x 3 or 4 x 4 or 3 x 3 x n or 4 x 4 x n numpy.ndarray
+        Single or array of either rotation matrices or homogeneous transforms.
+
+    units : {'rad', 'deg'}, optional
+        'rad' if `mat` is given in radians, 'deg' if degrees.
+
+    axis_order : {'xyz', 'zyx'}, optional
+        'xyz' for rotations about x, y, z axes or 'zyx' for rotations about
+        z, y, x axes.
+
+    Returns
+    -------
+    3-tuple of floats
+        Roll, pitch, yaw.
+
+    Raises
+    ------
+    ValueError
+        If mat is not a numpy.ndarray or is an invalid shape or units or axis
+        are invalid.
+
+    See Also
+    --------
+    rpy2r : roll-pitch-yaw to rotation matrix
+    rpy2t : roll-pitch-yaw to homogeneous transform
+    """
+    # TODO: the part of the docstring about the singularity was copied almost
+    #       exactly, need to verify it is correct.
+    if not isinstance(mat, np.ndarray):
+        raise ValueError('Expected numpy.ndarray subclass for mat, instead '
+                         'got {}.'.format(type(mat)))
+
+    if not any(((mat.ndim == 2 and mat.shape in ((3, 3), (4, 4))),
+                (mat.ndim == 3 and mat.shape[1:] in ((3, 3), (4, 4))))):
+        raise ValueError('Argument mat must have a shape in ((3, 3), '
+                         '(4, 4), (n, 3, 3), (n, 4, 4)) but instead was {}.'
+                         .format(mat.shape))
+
+    if axis_order not in ('xyz', 'zyx'):
+        raise ValueError("Expected one of ('xyz', 'zyx') for argument "
+                         "axis_order, instead got {}.".format(axis_order))
+
+    # TODO: the rest of this function can surely be refactored to far fewer LOC
+
+    is_single_matrix = mat.ndim == 2
+    if not is_single_matrix:
+        return np.stack((tr2rpy(single_mat, units, axis_order)
+                         for single_mat in mat), 0)
+
+    epsilon = np.spacing(1)  # equivalent to MATLAB's eps built-in
+    if axis_order == 'xyz':
+        singularity_present = all(abs(element) < epsilon for element in
+                                  (mat[1, 2], mat[2, 2]))
+        if singularity_present:
+            roll = 0
+            pitch = np.arctan2(mat[0, 2], mat[2, 2])
+            yaw = np.arctan2(mat[1, 0], mat[1, 1])
+        else:  # no singularity
+            roll = np.arctan2(-mat[1, 2], mat[2, 2])
+            sine_roll = np.sin(roll)
+            cos_roll = np.cos(roll)
+            pitch = np.arctan2(mat[0, 2],
+                               cos_roll * mat[2, 2] - sine_roll * mat[1, 2])
+            yaw = np.arctan2(-mat[0, 1], mat[0, 0])
+    else:  # axis_order == 'zyx'
+        singularity_present = all(abs(element) < epsilon for element in
+                                  (mat[0, 0], mat[1, 0]))
+        if singularity_present:
+            roll = 0
+            pitch = np.arctan2(-mat[2, 0], mat[0, 0])
+            yaw = np.arctan2(-mat[1, 2], mat[1, 1])
+        else:  # no singularity
+            roll = np.arctan2(mat[1, 0], mat[0, 0])
+            sine_roll = np.sin(roll)
+            cos_roll = np.cos(roll)
+            pitch = np.arctan2(-mat[2, 0],
+                               cos_roll * mat[0, 0] + sine_roll * mat[1, 0])
+            yaw = np.arctan2(sine_roll * mat[0, 2] - cos_roll * mat[1, 2],
+                             cos_roll * mat[1, 1] - sine_roll * mat[0, 1])
+
+    if units == 'deg':
+        roll, pitch, yaw = np.degrees((roll, pitch, yaw))
+
+    return roll, pitch, yaw
 
 
 def rpy2jac(roll_pitch_yaw, units='rad'):
@@ -559,7 +655,7 @@ def rpy2jac(roll_pitch_yaw, units='rad'):
     See Also
     --------
     rpy2r : roll-pitch-yaw to rotation matrix
-    rpy2tr : roll-pitch-yaw to homogeneous transform
+    rpy2t : roll-pitch-yaw to homogeneous transform
     """
     check_argument_roll_pitch_yaw_(roll_pitch_yaw)
 
