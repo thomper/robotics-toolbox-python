@@ -438,6 +438,80 @@ def trotz(theta, units='rad'):
     return trot_any_(theta, 'z', units)
 
 
+def se2(x, y, theta, units='rad'):
+    """
+    Create planar translation and rotation information.
+
+    Parameters
+    ----------
+    x : int or float
+        Horizontal translation.
+
+    y : int or float
+        Vertical translation.
+
+    theta : int or float
+        Rotation angle.
+
+    units : {'rad', 'deg'}, optional
+        'rad' if `theta` is given in radians, 'deg' if degrees.
+
+    Returns
+    -------
+    3 x 3 numpy.ndarray
+        Homogeneous transform representing translation by `x` and `y` and
+        rotation by `theta` in the plane.
+
+    See Also
+    --------
+    rot2 : Generate 2 x 2 rotation matrix
+    """
+    theta = convert_angle_(theta, units)
+
+    sine_theta = np.sin(theta)
+    cos_theta = np.cos(theta)
+
+    return np.array([[cos_theta, -sine_theta, x],
+                     [sine_theta, cos_theta, y],
+                     [0, 0, 1]])
+
+
+def se3(transform):
+    """
+    Generate a 4 x 4 homogeneous transform from a 3 x 3 homogeneous transform.
+
+    Parameters
+    ----------
+    transform : 3 x 3 numpy.ndarray
+        Transform to lift to 4 x 4.
+
+    Returns
+    -------
+    4 x 4 numpy.ndarray
+        Lifted transform.
+
+    Raises
+    ------
+    ValueError
+        If `transform` is invalid.
+
+    See Also
+    --------
+    se2 : Generate 3 x 3 homogeneous transform with translational component
+    rotx, roty, rotz : Generate 3 x 3 rotation matrix
+    trotx, troty, trotz : Generate 4 x 4 homogeneous transformation
+    """
+    if not isinstance(transform, np.ndarray) \
+       or not transform.shape == (3, 3):
+        raise ValueError('Expected 3 x 3 numpy.ndarray,'
+                         'instead got {}'.format(type))
+
+    return np.array([[transform[0, 0], transform[0, 1], 0, transform[0, 2]],
+                     [transform[1, 0], transform[1, 1], 0, transform[1, 2]],
+                     [0, 0, 1, 0],
+                     [0, 0, 0, 1]])
+
+
 # Conversion between roll/pitch/yaw and rotational matrices
 # -----------------------------------------------------------------------------
 

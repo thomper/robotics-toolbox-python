@@ -10,6 +10,12 @@ class TestRotation(unittest.TestCase):
                                                     [0.2955, 0.9553]]),
                                           decimal=4)
 
+        testing.assert_array_almost_equal(se2(1, 2, 0.3),
+                                          np.array([[0.9553, -0.2955, 1],
+                                                    [0.2955, 0.9553, 2],
+                                                    [0, 0, 1]]),
+                                          decimal=4)
+
         testing.assert_array_almost_equal(trot2(0.3),
                                           np.array([[0.9553, -0.2955, 0],
                                                     [0.2955, 0.9553, 0],
@@ -55,6 +61,13 @@ class TestRotation(unittest.TestCase):
                                           decimal=9)
         testing.assert_array_almost_equal(trotz(np.pi / 2), trotz(90, 'deg'),
                                           decimal=9)
+
+        testing.assert_array_almost_equal(se3(se2(1, 2, 0.3)),
+                                          np.array([[0.9553, -0.2955, 0, 1],
+                                                    [0.2955, 0.9553, 0, 2],
+                                                    [0, 0, 1, 0],
+                                                    [0, 0, 0, 1]]),
+                                          decimal=4)
 
     def test_r2t_2d_single_matrix(self):
         testing.assert_array_almost_equal(r2t(np.array([[1, 2], [3, 4]])),
