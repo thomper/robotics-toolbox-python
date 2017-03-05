@@ -1,5 +1,71 @@
 Port of Peter Corke's Robotics Toolbox library to Python 3.
 
-This is just a test.
 
+This is just a test.  So far only the following functions and their unit tests
+have been ported:
+
+rot2
+rotx, roty, rotz
+
+trot2
+trotx, troty, trotz
+
+se2, se3
+
+r2t
+t2r
+rpy2r, rpy2t (was just rpy2tr in the original)
+tr2rpy
+rpy2jac
+
+
+Licence
+-------
 Tentatively licensed under the GPLv3.
+
+
+Requirements
+------------
+Python 3.5+ and numpy 1.10+ to use the library and run tests.
+
+Sphinx with the numpydoc extension to generate documentation.
+
+
+Usage
+-----
+You will need to add the repo's top directory to the PYTHONPATH environment
+variable.  On Linux:
+
+export PYTHONPATH=$PYTHONPATH:/path/to/robotics-toolbox-python
+
+
+You can then use the library with:
+
+from robotools.transform import *
+
+See tests for examples of how the functions are used.
+
+
+To run the tests (all passing currently) run the following from the top
+directory:
+
+python -m unittest tests/*
+
+Ensure that python is your 3.5+ interpreter with numpy installed.  The best way
+to set this up is to use a venv.
+
+
+Documentation
+-------------
+Documentation follows numpy conventions where reasonable.  This means Sphinx is
+used to generate documentation.  So far, all the documentation is in docstrings.
+Edit docs/index.rst and docs/apireference.rst to update what is shown.
+
+To generate the documentation, ensure your PYTHONPATH environment variable
+includes the repo directory as per instructions in Usage above, then in the docs
+directory, run:
+
+make html
+
+This will build the html version of the documentation which you can then browse
+by opening docs/_build/index.html.
