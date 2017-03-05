@@ -19,6 +19,14 @@ def check_argument_units_(units):
                          "but got {}.".format(units))
 
 
+def check_argument_roll_pitch_yaw_(roll_pitch_yaw):
+    if not isinstance(roll_pitch_yaw, (tuple, list)):
+        if not isinstance(roll_pitch_yaw, np.ndarray):
+            raise ValueError('Expected tuple, list, or numpy.ndarray subclass '
+                             'for roll_pitch_yaw, instead got {}.'.format(
+                    type(roll_pitch_yaw)))
+
+
 def convert_angle_(theta, units):
     """
     If units == 'deg', return theta converted to radians, else return theta.
@@ -464,12 +472,9 @@ def rpy2r(roll_pitch_yaw, units='rad', axis_order='xyz'):
     See Also
     --------
     rpy2tr : roll-pitch-yaw to homogeneous transform
+    rpy2jac : roll-pitch-yaw to Jacobian matrix
     """
-    if not isinstance(roll_pitch_yaw, (tuple, list)):
-        if not isinstance(roll_pitch_yaw, np.ndarray):
-            raise ValueError('Expected tuple, list, or numpy.ndarray subclass '
-                             'for roll_pitch_yaw, instead got {}.'.format(
-                    type(roll_pitch_yaw)))
+    check_argument_roll_pitch_yaw_(roll_pitch_yaw)
 
     if axis_order == 'xyz':
         rot_func_a, rot_func_b, rot_func_c = rotx, roty, rotz
@@ -516,10 +521,57 @@ def rpy2tr(roll_pitch_yaw, units='rad', axis_order='xyz'):
     Raises
     ------
     ValueError
-        If units or axis_order is invalid
+        If units or axis_order is invalid.
 
     See Also
     --------
     rpy2r : roll-pitch-yaw to rotation matrix
+    rpy2jac : roll-pitch-yaw to Jacobian matrix
     """
     return r2t(rpy2r(roll_pitch_yaw, units, axis_order))
+
+
+def rpy2jac(roll_pitch_yaw, units='rad'):
+    """
+    Generate angular velocity Jacobian matrix from roll-pitch-yaw angles.
+
+    Used in the creation of an analytical Jacobian.
+
+    Parameters
+    ----------
+    roll_pitch_yaw : numpy.ndarray or tuple or list of int or float
+        If tuple or list: roll, pitch, and yaw.
+        If numpy.ndarray: n x 3 array of roll, pitch, and yaw.
+
+    units : {'rad', 'deg'}, optional
+        'rad' if `roll_pitch_yaw` is given in radians, 'deg' if degrees.
+
+    Returns
+    -------
+    3 x 3 x n numpy.ndarray
+        Array of n Jacobian matrices.
+
+    Raises
+    ------
+    ValueError
+        If units is invalid.
+
+    See Also
+    --------
+    rpy2r : roll-pitch-yaw to rotation matrix
+    rpy2tr : roll-pitch-yaw to homogeneous transform
+    """
+    check_argument_roll_pitch_yaw_(roll_pitch_yaw)
+
+    roll_pitch_yaw = convert_angle_(roll_pitch_yaw, units)
+
+    if isinstance(roll_pitch_yaw, (tuple, list)) or roll_pitch_yaw.ndim == 1:
+        roll, pitch, yaw = roll_pitch_yaw
+        return np.array([[1, 0, np.sin(pitch)],
+                         [0, np.cos(roll), -np.cos(pitch) * np.sin(roll)],
+                         [0, np.sin(roll), np.cos(pitch) * np.cos(roll)]])
+    else:
+        return np.stack((np.array([[1, 0, np.sin(pitch)],
+                                   [0, np.cos(roll), -np.cos(pitch) * np.sin(roll)],
+                                   [0, np.sin(roll), np.cos(pitch) * np.cos(roll)]])
+                         for roll, pitch, yaw in roll_pitch_yaw), 0)
